@@ -334,6 +334,36 @@ body {
   cursor: pointer; font-size: 0.88rem; margin-top: 6px; width: 100%;
 }
 
+/* ── Tools bar ───────────────────────────────────────────────────── */
+#tools-bar {
+  background: rgba(0,0,0,0.25);
+  display: flex;
+  gap: 6px;
+  padding: 5px 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.tool-btn {
+  background: rgba(255,255,255,0.12);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.12s;
+  white-space: nowrap;
+}
+.tool-btn:active { background: rgba(255,255,255,0.28); }
+.tool-cost { opacity: 0.6; font-size: 0.65rem; }
+
+/* Hint highlight pulse */
+.hint-glow { animation: hintPulse 1.2s ease-out; }
+@keyframes hintPulse {
+  0%, 100% { filter: none; }
+  50% { filter: drop-shadow(0 0 14px #f5c518) drop-shadow(0 0 6px #f5c518); }
+}
+
 /* ── Toast ───────────────────────────────────────────────────────── */
 #toast {
   position: fixed; bottom: 26px; left: 50%;
@@ -374,6 +404,12 @@ body {
   <button class="btn" onclick="undoMove()">↩ Undo</button>
   <button class="btn" onclick="newGame()">↺ New</button>
   <button class="btn" onclick="document.getElementById('help-modal').classList.add('show')">?</button>
+</div>
+
+<div id="tools-bar">
+  <button class="tool-btn" onclick="shuffleTableau()" title="Shuffle all face-up tableau cards">🔀 Shuffle <span class="tool-cost">−20 pts</span></button>
+  <button class="tool-btn" onclick="addFoundationSlot()" title="Unlock an extra foundation slot">➕ Slot <span class="tool-cost">−30 pts</span></button>
+  <button class="tool-btn" onclick="hintMove()" title="Highlight a card that can move to a foundation">💡 Hint</button>
 </div>
 
 <div id="game">
@@ -1224,6 +1260,72 @@ function undoMove() {
   G = h.g; score = h.score;
   render();
   toast('Move undone');
+}
+
+// ── Tools ─────────────────────────────────────────────────────────────────────
+
+/** Shuffles all face-up cards across tableau columns in-place. */
+function shuffleTableau() {
+  const pool = [], slots = [];
+  for (let col = 0; col < 4; col++)
+    for (let i = 0; i < G.tableau[col].length; i++)
+      if (G.tableau[col][i].faceUp) {
+        pool.push(G.tableau[col][i]);
+        slots.push({ col, idx: i });
+      }
+  if (pool.length < 2) { toast('Not enough face-up cards to shuffle'); return; }
+  saveHist();
+  shuffle(pool);
+  slots.forEach((s, i) => { G.tableau[s.col][s.idx] = pool[i]; });
+  score = Math.max(0, score - 20);
+  toast('Tableau shuffled  −20 pts');
+  render();
+}
+
+/** Unlocks one additional foundation slot. */
+function addFoundationSlot() {
+  if (G.foundationRevealed >= NUM_CATS) { toast('All foundation slots are already open'); return; }
+  saveHist();
+  G.foundationRevealed++;
+  score = Math.max(0, score - 30);
+  toast('Foundation slot unlocked  −30 pts');
+  render();
+}
+
+/** Highlights a card that can immediately move to an open foundation. */
+function hintMove() {
+  // Check waste top first
+  if (G.waste.length > 0) {
+    const card = G.waste[G.waste.length - 1];
+    if (findFoundationFor(card) >= 0) {
+      const w = document.getElementById('waste-wrap');
+      w.classList.remove('hint-glow');
+      void w.offsetWidth; // restart animation
+      w.classList.add('hint-glow');
+      setTimeout(() => w.classList.remove('hint-glow'), 1200);
+      toast(`Hint: waste card can go to ${CATS[card.cat].name} foundation`);
+      return;
+    }
+  }
+  // Check top face-up card in each tableau column
+  for (let col = 0; col < 4; col++) {
+    const cards = G.tableau[col];
+    if (!cards.length) continue;
+    const top = cards[cards.length - 1];
+    if (!top.faceUp) continue;
+    if (findFoundationFor(top) >= 0) {
+      const colEl = document.querySelector(`#tableau .col:nth-child(${col + 1})`);
+      if (colEl) {
+        colEl.classList.remove('hint-glow');
+        void colEl.offsetWidth;
+        colEl.classList.add('hint-glow');
+        setTimeout(() => colEl.classList.remove('hint-glow'), 1200);
+      }
+      toast(`Hint: double-tap the ${CATS[top.cat].name} card to send it to its foundation`);
+      return;
+    }
+  }
+  toast('No ready moves to a foundation — try shuffling!');
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
