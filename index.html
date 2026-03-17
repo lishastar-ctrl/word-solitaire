@@ -150,8 +150,8 @@ body {
   flex-shrink: 0;
   min-height: 18px;
 }
-.cf-icon { font-size: 0.72rem; line-height: 1; }
-.cf-cat  { font-size: 0.44rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; overflow: hidden; white-space: nowrap; }
+.cf-icon { font-size: 0.85rem; line-height: 1; }
+.cf-cat  { font-size: 0.54rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; overflow: hidden; white-space: nowrap; }
 .cf-body {
   flex: 1;
   display: flex;
@@ -162,11 +162,11 @@ body {
   gap: 2px;
 }
 .cf-emoji {
-  font-size: 1.9rem;
+  font-size: 2.3rem;
   line-height: 1;
 }
 .cf-word {
-  font-size: 0.58rem;
+  font-size: 0.72rem;
   font-weight: 800;
   text-align: center;
   color: var(--cat-color, #333);
@@ -334,10 +334,10 @@ body {
 @media (max-width: 500px) {
   #hdr-title { font-size: 0.88rem; }
   /* Scale card text with card width */
-  .cf-icon  { font-size: calc(var(--cw) * 0.10); }
-  .cf-cat   { font-size: calc(var(--cw) * 0.062); }
-  .cf-emoji { font-size: calc(var(--cw) * 0.36); }
-  .cf-word  { font-size: calc(var(--cw) * 0.094); }
+  .cf-icon  { font-size: calc(var(--cw) * 0.12); }
+  .cf-cat   { font-size: calc(var(--cw) * 0.075); }
+  .cf-emoji { font-size: calc(var(--cw) * 0.44); }
+  .cf-word  { font-size: calc(var(--cw) * 0.115); }
   .empty-slot { font-size: calc(var(--cw) * 0.22); }
   .empty-slot .slot-label { font-size: calc(var(--cw) * 0.065); }
   /* Level screen: 2-column grid instead of wrapping flex */
@@ -449,6 +449,15 @@ const ALL_CATS = [
   { name:'Spells',     icon:'🪄', color:'#4527a0' },
   { name:'Hot Sauce',  icon:'🌶️', color:'#b71c1c' },
   { name:'Conspiracy', icon:'👁️', color:'#1b5e20' },
+  // Extra — split across levels (indices 21–28)
+  { name:'Colors',     icon:'🎨', color:'#e53935' },
+  { name:'Superheroes',icon:'🦸', color:'#1565c0' },
+  { name:'Desserts',   icon:'🍰', color:'#e91e63' },
+  { name:'Gems',       icon:'💎', color:'#0097a7' },
+  { name:'Board Games',icon:'🎲', color:'#5d4037' },
+  { name:'Holidays',   icon:'🎄', color:'#2e7d32' },
+  { name:'Planets',    icon:'🪐', color:'#283593' },
+  { name:'Currencies', icon:'💰', color:'#f57f17' },
 ];
 
 const ALL_WORDS = [
@@ -494,12 +503,28 @@ const ALL_WORDS = [
   [['Tabasco','🌡️'],['Sriracha','🐓'],['Cholula','🎃'],['Chipotle','🍂'],['Habanero','💥']],
   // 20 Conspiracy (5)
   [['Bigfoot','🦶'],['Flat Earth','🌐'],['Lizard Folk','🦎'],['Microchip','💾'],['Illuminati','👁️']],
+  // 21 Colors (4)
+  [['Red','🔴'],['Blue','🔵'],['Gold','🟡'],['Violet','🟣']],
+  // 22 Superheroes (4)
+  [['Batman','🦇'],['Spider-Man','🕷️'],['Iron Man','🦾'],['Wonder Woman','⚡']],
+  // 23 Desserts (4)
+  [['Brownie','🍫'],['Tiramisu','☕'],['Churro','🌀'],['Macaron','🫐']],
+  // 24 Gems (4)
+  [['Diamond','💎'],['Ruby','♦️'],['Emerald','💚'],['Sapphire','💙']],
+  // 25 Board Games (4)
+  [['Chess','♟️'],['Monopoly','🎩'],['Scrabble','🔤'],['Risk','🗺️']],
+  // 26 Holidays (4)
+  [['Christmas','🎄'],['Halloween','🎃'],['Easter','🐣'],['Diwali','🪔']],
+  // 27 Planets (4)
+  [['Mars','🔴'],['Venus','💛'],['Saturn','💫'],['Neptune','🌊']],
+  // 28 Currencies (4)
+  [['Dollar','💵'],['Euro','💶'],['Yen','💴'],['Bitcoin','🪙']],
 ];
 
 const LEVELS = [
-  { name:'The Classics',  emoji:'🌟', desc:'Familiar words, friendly game',         difficulty:1, cats:[0,1,2,3,4,5],           startSlots:3 },
-  { name:'Arts & Beyond', emoji:'🎭', desc:'Creative categories, trickier deck',     difficulty:2, cats:[6,7,8,9,10,11,12],       startSlots:3 },
-  { name:'Weird & Wild',  emoji:'🤪', desc:'Unexpected themes, maximum chaos',       difficulty:3, cats:[13,14,15,16,17,18,19,20], startSlots:3 },
+  { name:'The Classics',  emoji:'🌟', desc:'Familiar words, friendly game',         difficulty:1, cats:[0,1,2,3,4,5,21,23,26],           startSlots:3 },
+  { name:'Arts & Beyond', emoji:'🎭', desc:'Creative categories, trickier deck',     difficulty:2, cats:[6,7,8,9,10,11,12,22,24,25],      startSlots:3 },
+  { name:'Weird & Wild',  emoji:'🤪', desc:'Unexpected themes, maximum chaos',       difficulty:3, cats:[13,14,15,16,17,18,19,20,27,28],   startSlots:3 },
 ];
 
 // ── Dynamic level state ───────────────────────────────────────────────────────
