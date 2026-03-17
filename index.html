@@ -526,6 +526,33 @@ const ALL_CATS = [
   { name:'Thinkers',     icon:'🤔',  color:'#4a148c' },  // 42
   { name:'Music Eras',   icon:'🎼',  color:'#880e4f' },  // 43
   { name:'Arctic',       icon:'❄️',  color:'#01579b' },  // 44
+  // Professional — Levels 7-8 (indices 45–57)
+  { name:'Drug Discovery',    icon:'🧬', color:'#1565c0' },  // 45
+  { name:'Clinical Ops',      icon:'🏥', color:'#00695c' },  // 46
+  { name:'Regulatory',        icon:'📋', color:'#4a148c' },  // 47
+  { name:'Pharmacovigilance', icon:'⚠️', color:'#b71c1c' },  // 48
+  { name:'Quality',           icon:'✅', color:'#e65100' },  // 49
+  { name:'Finance',           icon:'💰', color:'#33691e' },  // 50
+  { name:'IT & Infra',        icon:'☁️', color:'#0d47a1' },  // 51
+  { name:'Models',            icon:'🤖', color:'#1a237e' },  // 52
+  { name:'Training',          icon:'🎯', color:'#6a1b9a' },  // 53
+  { name:'Architecture',      icon:'⚡', color:'#006064' },  // 54
+  { name:'Retrieval',         icon:'📚', color:'#1b5e20' },  // 55
+  { name:'Concepts',          icon:'💬', color:'#880e4f' },  // 56
+  { name:'Evaluation',        icon:'📏', color:'#37474f' },  // 57
+  // Pharma pool extras (indices 58–63)
+  { name:'Translational Sci', icon:'🔭', color:'#00838f' },  // 58
+  { name:'Manufacturing',     icon:'🏭', color:'#4e342e' },  // 59
+  { name:'Medical Affairs',   icon:'🩺', color:'#283593' },  // 60
+  { name:'Commercial',        icon:'📡', color:'#558b2f' },  // 61
+  { name:'HR & People',       icon:'⭐', color:'#6d4c41' },  // 62
+  { name:'Legal',             icon:'⚖️', color:'#4a148c' },  // 63
+  // AI pool extras (indices 64–68)
+  { name:'Frameworks',        icon:'🔥', color:'#bf360c' },  // 64
+  { name:'AI Companies',      icon:'🧡', color:'#37474f' },  // 65
+  { name:'Tasks',             icon:'✍️', color:'#1b5e20' },  // 66
+  { name:'Techniques',        icon:'🪄', color:'#4a148c' },  // 67
+  { name:'Hardware',          icon:'🖥️', color:'#0d47a1' },  // 68
 ];
 
 const ALL_WORDS = [
@@ -619,6 +646,54 @@ const ALL_WORDS = [
   [['Baroque','🎻'],['Classical','🎼'],['Romantic','🌹'],['Jazz','🎷']],
   // 44 Arctic (5)
   [['Polar Bear','🐻‍❄️'],['Walrus','🦭'],['Narwhal','🐬'],['Puffin','🐧'],['Snowy Owl','🦉']],
+  // 45 Drug Discovery (5)
+  [['Benchling','🧬'],['Dotmatics','🔬'],['Schrödinger','🧪'],['AlphaFold','🫧'],['ChemAxon','⚗️']],
+  // 46 Clinical Ops (5)
+  [['Medidata','📊'],['Veeva CTMS','🏥'],['Oracle CTMS','🏛️'],['TriNetX','🕸️'],['SiteVault','🏠']],
+  // 47 Regulatory (5)
+  [['Veeva RIM','📋'],['Documentum','📁'],['Lorenz','🗂️'],['EXTEDO','🖊️'],['Kivo','🔑']],
+  // 48 Pharmacovigilance (5)
+  [['Argus Safety','⚠️'],['Veeva Safety','🛡️'],['ArisGlobal','🌐'],['RxLogix','💊'],['Empirica','📈']],
+  // 49 Quality (5)
+  [['Veeva QMS','✅'],['MasterControl','🎛️'],['TrackWise','🔄'],['Qualio','💯'],['Kneat','🪢']],
+  // 50 Finance (5)
+  [['SAP ERP','💰'],['Oracle ERP','🏦'],['Workday','📅'],['Anaplan','📐'],['Coupa','🛒']],
+  // 51 IT & Infra (5)
+  [['AWS','☁️'],['Azure','🔷'],['Snowflake','❄️'],['Databricks','🧱'],['Okta','🔐']],
+  // 52 Models (5)
+  [['GPT','🤖'],['LLaMA','🦙'],['Claude','🤍'],['Gemini','♊'],['Mistral','🌬️']],
+  // 53 Training (5)
+  [['Fine-tune','🎯'],['RLHF','🏆'],['Backprop','↩️'],['Dropout','💧'],['Batching','📦']],
+  // 54 Architecture (5)
+  [['Transformer','⚡'],['Attention','👁️'],['Encoder','🔒'],['Diffusion','🌊'],['CNN','🖼️']],
+  // 55 Retrieval (5)
+  [['RAG','📚'],['Chunking','🧩'],['Embedding','🗺️'],['Vector DB','🗄️'],['Reranking','📊']],
+  // 56 Concepts (5)
+  [['Hallucination','👻'],['Temperature','🌡️'],['Prompt','💬'],['Token','✂️'],['Context','🪟']],
+  // 57 Evaluation (4)
+  [['Benchmark','📏'],['Perplexity','🤔'],['BLEU','🔵'],['Recall','🔍']],
+  // 58 Translational Sci (5)
+  [['WinNonlin','📉'],['GastroPlus','💉'],['NONMEM','🧮'],['GraphPad','📌'],['Simcyp','🫀']],
+  // 59 Manufacturing (5)
+  [['SAP MES','🏭'],['LabWare','🧫'],['LabVantage','🔭'],['Empower CDS','🌊'],['PAS-X','⚙️']],
+  // 60 Medical Affairs (5)
+  [['Veeva Link','🔗'],['MedComms','📣'],['MedInquiry','🩺'],['IQVIA RWE','🌍'],['TreeAge','🌲']],
+  // 61 Commercial (5)
+  [['Veeva CRM','👔'],['IQVIA OCE','📡'],['Salesforce','💙'],['Model N','🎰'],['ZAIDYN','🤝']],
+  // 62 HR & People (5)
+  [['Workday HCM','👩‍💼'],['SuccessFactors','⭐'],['Greenhouse','🌱'],['Cornerstone','🪨'],['Radford','💵']],
+  // 63 Legal (5)
+  [['Icertis','⚖️'],['Agiloft','📜'],['OneTrust','🔏'],['Derwent','💡'],['Anaqua','🏷️']],
+  // 64 Frameworks (5)
+  [['PyTorch','🔥'],['TensorFlow','🌿'],['JAX','🧰'],['Keras','🎀'],['HuggingFace','🤗']],
+  // 65 AI Companies (5)
+  [['OpenAI','🌐'],['Anthropic','🧡'],['DeepMind','🧠'],['Meta AI','👾'],['xAI','🚀']],
+  // 66 Tasks (5)
+  [['Classification','🏷️'],['Generation','✍️'],['Summarization','📝'],['Translation','🌏'],['Detection','👀']],
+  // 67 Techniques (5)
+  [['LoRA','🪄'],['QLoRA','🔧'],['PEFT','🔗'],['CoT','🎲'],['Few-shot','🧲']],
+  // 68 Hardware (5)
+  [['GPU','🖥️'],['TPU','💻'],['NVIDIA H100','🟩'],['Apple Silicon','🍎'],['Cerebras','🔋']],
 ];
 
 const LEVELS = [
@@ -628,6 +703,8 @@ const LEVELS = [
   { name:'Science & Nature',emoji:'🔬', desc:'New domains — only 2 slots to start',         difficulty:4, cats:[29,30,31,32,34,39,40,41,44],                 startSlots:2 },
   { name:'World & Culture', emoji:'🌐', desc:'Global & arts mix — stay sharp',               difficulty:5, cats:[33,35,36,37,38,42,43,30,32,34],              startSlots:2 },
   { name:'Nightmare Mode',  emoji:'💀', desc:'11 categories. One starting slot. No mercy.', difficulty:6, cats:[29,31,33,35,36,37,38,39,40,41,42],           startSlots:1 },
+  { name:'Pharma Tech Stack',     emoji:'💊', desc:'7 of 13 domains per game — never the same twice',    difficulty:5, catPool:[45,46,47,48,49,50,51,58,59,60,61,62,63], numCats:7, startSlots:2 },
+  { name:'AI & Machine Learning', emoji:'🧠', desc:'6 of 11 topics per game — know your full stack',     difficulty:5, catPool:[52,53,54,55,56,57,64,65,66,67,68],       numCats:6, startSlots:2 },
 ];
 
 // ── Dynamic level state ───────────────────────────────────────────────────────
@@ -637,8 +714,11 @@ let CATS = [], WORDS = [], NUM_CATS = 0;
 
 function applyLevel(lvl) {
   const L = LEVELS[lvl];
-  CATS  = L.cats.map(i => ALL_CATS[i]);
-  WORDS = L.cats.map(i => ALL_WORDS[i]);
+  const cats = L.catPool
+    ? shuffle([...L.catPool]).slice(0, L.numCats)
+    : L.cats;
+  CATS  = cats.map(i => ALL_CATS[i]);
+  WORDS = cats.map(i => ALL_WORDS[i]);
   NUM_CATS = CATS.length;
 }
 
