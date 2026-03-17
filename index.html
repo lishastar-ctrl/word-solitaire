@@ -8,12 +8,13 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --bg: #2d5a3d;
-  --cw: 74px;
-  --ch: 108px;
-  --cr: 9px;
   --gap: 5px;
-  --off-up: 22px;
-  --off-dn: 9px;
+  /* Cards fill tableau width: 5 cols + 4 gaps + 2×padding */
+  --cw: min(74px, calc((100vw - 30px) / 5));
+  --ch: calc(var(--cw) * 1.46);
+  --cr: min(9px, calc(var(--cw) * 0.13));
+  --off-up: calc(var(--cw) * 0.30);
+  --off-dn: calc(var(--cw) * 0.12);
 }
 body {
   background: var(--bg);
@@ -330,20 +331,21 @@ body {
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ── Responsive ──────────────────────────────────────────────────── */
-@media (max-width: 580px) {
-  :root { --cw: 42px; --ch: 62px; --cr: 6px; --gap: 3px; --off-up: 14px; --off-dn: 6px; }
-  #hdr-title { font-size: 0.9rem; }
-  .cf-icon  { font-size: 0.58rem; }
-  .cf-cat   { font-size: 0.34rem; }
-  .cf-emoji { font-size: 1.05rem; }
-  .cf-word  { font-size: 0.42rem; }
-  .empty-slot { font-size: 0.9rem; }
-  .empty-slot .slot-label { font-size: 0.36rem; }
-}
-@media (max-width: 380px) {
-  :root { --cw: 37px; --ch: 55px; --gap: 2px; --off-up: 12px; --off-dn: 5px; }
-  .cf-emoji { font-size: 0.9rem; }
-  .cf-word  { font-size: 0.38rem; }
+@media (max-width: 500px) {
+  #hdr-title { font-size: 0.88rem; }
+  /* Scale card text with card width */
+  .cf-icon  { font-size: calc(var(--cw) * 0.10); }
+  .cf-cat   { font-size: calc(var(--cw) * 0.062); }
+  .cf-emoji { font-size: calc(var(--cw) * 0.36); }
+  .cf-word  { font-size: calc(var(--cw) * 0.094); }
+  .empty-slot { font-size: calc(var(--cw) * 0.22); }
+  .empty-slot .slot-label { font-size: calc(var(--cw) * 0.065); }
+  /* Level screen: 2-column grid instead of wrapping flex */
+  #ls-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 4px; }
+  .lv-card { width: auto; }
+  .lv-emoji { font-size: 1.8rem; }
+  .lv-name  { font-size: 0.82rem; }
+  .lv-cats  { font-size: 0.88rem; letter-spacing: 2px; }
 }
 </style>
 </head>
