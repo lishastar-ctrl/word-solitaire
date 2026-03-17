@@ -762,7 +762,8 @@ function buildLevelScreen() {
     const card = document.createElement('div');
     card.className = 'lv-card';
     const stars   = '⭐'.repeat(Math.min(L.difficulty, 5)) + '☆'.repeat(Math.max(0, 5 - L.difficulty));
-    const catIcons = L.cats.map(c => ALL_CATS[c].icon).join(' ');
+    const iconSrc = L.cats || L.catPool.slice(0, L.numCats);
+    const catIcons = iconSrc.map(c => ALL_CATS[c].icon).join(' ');
     card.innerHTML =
       `<div class="lv-badge">Level ${i + 1}</div>` +
       `<div class="lv-emoji">${L.emoji}</div>` +
