@@ -1264,21 +1264,32 @@ function undoMove() {
 
 // ── Tools ─────────────────────────────────────────────────────────────────────
 
-/** Shuffles all face-up cards across tableau columns in-place. */
+/** Shuffles all face-down tableau cards and stock cards together.
+ *  Face-up cards stay put; hidden cards are redistributed randomly. */
 function shuffleTableau() {
-  const pool = [], slots = [];
+  // Collect face-down tableau cards with their positions
+  const pool = [], fdSlots = [];
   for (let col = 0; col < 4; col++)
     for (let i = 0; i < G.tableau[col].length; i++)
-      if (G.tableau[col][i].faceUp) {
-        pool.push(G.tableau[col][i]);
-        slots.push({ col, idx: i });
+      if (!G.tableau[col][i].faceUp) {
+        pool.push({...G.tableau[col][i]});
+        fdSlots.push({ col, idx: i });
       }
-  if (pool.length < 2) { toast('Not enough face-up cards to shuffle'); return; }
+  // Add stock cards to the pool
+  const stockCount = G.stock.length;
+  G.stock.forEach(c => pool.push({...c, faceUp: false}));
+
+  if (pool.length < 2) { toast('Not enough hidden cards to shuffle'); return; }
   saveHist();
   shuffle(pool);
-  slots.forEach((s, i) => { G.tableau[s.col][s.idx] = pool[i]; });
+
+  // Put the first batch back into face-down tableau slots
+  fdSlots.forEach((s, i) => { G.tableau[s.col][s.idx] = pool[i]; });
+  // Put the remainder back into the stock
+  G.stock = pool.slice(fdSlots.length).map(c => ({...c, faceUp: false}));
+
   score = Math.max(0, score - 20);
-  toast('Tableau shuffled  −20 pts');
+  toast('Hidden cards shuffled  −20 pts');
   render();
 }
 
