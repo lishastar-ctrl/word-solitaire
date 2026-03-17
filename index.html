@@ -708,8 +708,15 @@ function makeCard(card, sourcePile, sourceCol, sourceIdx) {
 
 // ── Render ────────────────────────────────────────────────────────────────────
 
-function cssVar(v) {
-  return parseInt(getComputedStyle(document.documentElement).getPropertyValue(v)) || 0;
+function getLayout() {
+  const cw = Math.min(90, (window.innerWidth - 28) / 4);
+  return {
+    cw:    Math.round(cw),
+    ch:    Math.round(cw * 1.46),
+    cr:    Math.min(9, Math.round(cw * 0.13)),
+    offUp: Math.round(cw * 0.42),
+    offDn: Math.round(cw * 0.12),
+  };
 }
 
 function render() {
@@ -790,7 +797,7 @@ function renderFoundations() {
       const c   = makeCard(top);
       w.appendChild(c);
       const pct = (G.foundations[f].length / catLen(catIdx)) * 100;
-      const cr  = cssVar('--cr');
+      const { cr } = getLayout();
       const prog = document.createElement('div');
       prog.style.cssText = `position:absolute;bottom:0;left:0;height:3px;width:${pct}%;background:${CATS[catIdx].color};border-radius:0 0 ${cr}px ${cr}px;pointer-events:none;z-index:5`;
       w.appendChild(prog);
@@ -811,7 +818,7 @@ function renderFoundations() {
 function renderTableau() {
   const el = document.getElementById('tableau');
   el.innerHTML = '';
-  const ch = cssVar('--ch'), offUp = cssVar('--off-up'), offDn = cssVar('--off-dn');
+  const { ch, offUp, offDn } = getLayout();
 
   for (let col = 0; col < 4; col++) {
     const colEl = document.createElement('div');
@@ -820,7 +827,7 @@ function renderTableau() {
     const cards = G.tableau[col];
 
     if (cards.length === 0) {
-      colEl.style.height = ch + 'px';
+      colEl.style.height = '';
       const slot = document.createElement('div');
       slot.className = 'col-slot';
       slot.dataset.col = col;
@@ -941,7 +948,7 @@ document.addEventListener('pointercancel', function() {
 });
 
 function createGhost(x, y) {
-  const cw = cssVar('--cw'), ch = cssVar('--ch'), offUp = cssVar('--off-up');
+  const { cw, ch, offUp } = getLayout();
   const ghost = document.createElement('div');
   ghost.id = 'drag-ghost';
   ghost.style.width  = cw + 'px';
