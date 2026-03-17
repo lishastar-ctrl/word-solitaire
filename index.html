@@ -471,8 +471,25 @@ const ALL_CATS = [
   { name:'Gems',       icon:'💎', color:'#0097a7' },
   { name:'Board Games',icon:'🎲', color:'#5d4037' },
   { name:'Holidays',   icon:'🎄', color:'#2e7d32' },
-  { name:'Planets',    icon:'🪐', color:'#283593' },
-  { name:'Currencies', icon:'💰', color:'#f57f17' },
+  { name:'Planets',      icon:'🪐', color:'#283593' },
+  { name:'Currencies',   icon:'💰', color:'#f57f17' },
+  // New — Levels 4-6 (indices 29–44)
+  { name:'Elements',     icon:'⚗️',  color:'#455a64' },  // 29
+  { name:'Languages',    icon:'🗣️',  color:'#1a237e' },  // 30
+  { name:'Dog Breeds',   icon:'🐕',  color:'#4e342e' },  // 31
+  { name:'Flowers',      icon:'🌸',  color:'#e91e63' },  // 32
+  { name:'Genres',       icon:'🎬',  color:'#212121' },  // 33
+  { name:'Capitals',     icon:'🏙️',  color:'#0d47a1' },  // 34
+  { name:'Martial Arts', icon:'🥋',  color:'#b71c1c' },  // 35
+  { name:'Civilizations',icon:'🏛️',  color:'#795548' },  // 36
+  { name:'Cooking',      icon:'🍳',  color:'#e65100' },  // 37
+  { name:'Cat Breeds',   icon:'🐈',  color:'#8d6e63' },  // 38
+  { name:'Minerals',     icon:'🪨',  color:'#546e7a' },  // 39
+  { name:'Missions',     icon:'🛸',  color:'#1565c0' },  // 40
+  { name:'Yoga Poses',   icon:'🧘',  color:'#33691e' },  // 41
+  { name:'Thinkers',     icon:'🤔',  color:'#4a148c' },  // 42
+  { name:'Music Eras',   icon:'🎼',  color:'#880e4f' },  // 43
+  { name:'Arctic',       icon:'❄️',  color:'#01579b' },  // 44
 ];
 
 const ALL_WORDS = [
@@ -534,12 +551,47 @@ const ALL_WORDS = [
   [['Mars','🔴'],['Venus','💛'],['Saturn','💫'],['Neptune','🌊']],
   // 28 Currencies (4)
   [['Dollar','💵'],['Euro','💶'],['Yen','💴'],['Bitcoin','🪙']],
+  // 29 Elements (6)
+  [['Gold','🥇'],['Neon','💡'],['Iron','⚙️'],['Helium','🎈'],['Carbon','🌑'],['Oxygen','💨']],
+  // 30 Languages (5)
+  [['Mandarin','🀄'],['Arabic','🌙'],['Hindi','🪔'],['Swahili','🌍'],['Bengali','📜']],
+  // 31 Dog Breeds (5)
+  [['Poodle','🐩'],['Bulldog','💪'],['Husky','🐺'],['Corgi','🦊'],['Beagle','🔍']],
+  // 32 Flowers (5)
+  [['Orchid','🌸'],['Tulip','🌷'],['Sunflower','🌻'],['Lily','💐'],['Lotus','🪷']],
+  // 33 Genres (5)
+  [['Horror','😱'],['Comedy','😂'],['Thriller','🔪'],['Romance','💕'],['Western','🤠']],
+  // 34 Capitals (5)
+  [['Paris','🗼'],['Tokyo','⛩️'],['Cairo','🕌'],['Ottawa','🍁'],['Lima','🦙']],
+  // 35 Martial Arts (5)
+  [['Karate','🥋'],['Judo','🤼'],['Taekwondo','🦵'],['Aikido','🌀'],['Capoeira','🎵']],
+  // 36 Civilizations (5)
+  [['Roman','🏟️'],['Greek','🏺'],['Egyptian','🪆'],['Aztec','☀️'],['Viking','🛡️']],
+  // 37 Cooking (5)
+  [['Sauté','🍳'],['Braise','🫕'],['Blanch','🫧'],['Sear','🔥'],['Poach','🥚']],
+  // 38 Cat Breeds (5)
+  [['Siamese','👁️'],['Persian','🎀'],['Maine Coon','🦁'],['Tabby','🐯'],['Sphynx','🫥']],
+  // 39 Minerals (4)
+  [['Quartz','🔮'],['Obsidian','🖤'],['Amethyst','💜'],['Pyrite','✨']],
+  // 40 Missions (5)
+  [['Apollo','🌕'],['Voyager','🚀'],['Hubble','🔭'],['Curiosity','🪨'],['ISS','🛸']],
+  // 41 Yoga Poses (5)
+  [['Cobra','🐍'],['Warrior','⚔️'],['Tree','🌳'],['Crow','🐦'],['Bridge','🌁']],
+  // 42 Thinkers (5)
+  [['Plato','🦉'],['Kant','📝'],['Nietzsche','🎭'],['Socrates','☕'],['Confucius','🧧']],
+  // 43 Music Eras (4)
+  [['Baroque','🎻'],['Classical','🎼'],['Romantic','🌹'],['Jazz','🎷']],
+  // 44 Arctic (5)
+  [['Polar Bear','🐻‍❄️'],['Walrus','🦭'],['Narwhal','🐬'],['Puffin','🐧'],['Snowy Owl','🦉']],
 ];
 
 const LEVELS = [
-  { name:'The Classics',  emoji:'🌟', desc:'Familiar words, friendly game',         difficulty:1, cats:[0,1,2,3,4,5,21,23,26],           startSlots:3 },
-  { name:'Arts & Beyond', emoji:'🎭', desc:'Creative categories, trickier deck',     difficulty:2, cats:[6,7,8,9,10,11,12,22,24,25],      startSlots:3 },
-  { name:'Weird & Wild',  emoji:'🤪', desc:'Unexpected themes, maximum chaos',       difficulty:3, cats:[13,14,15,16,17,18,19,20,27,28],   startSlots:3 },
+  { name:'The Classics',    emoji:'🌟', desc:'Familiar words, friendly game',               difficulty:1, cats:[0,1,2,3,4,5,21,23,26],                      startSlots:3 },
+  { name:'Arts & Beyond',   emoji:'🎭', desc:'Creative categories, trickier deck',           difficulty:2, cats:[6,7,8,9,10,11,12,22,24,25],                 startSlots:3 },
+  { name:'Weird & Wild',    emoji:'🤪', desc:'Unexpected themes, maximum chaos',             difficulty:3, cats:[13,14,15,16,17,18,19,20,27,28],              startSlots:3 },
+  { name:'Science & Nature',emoji:'🔬', desc:'New domains — only 2 slots to start',         difficulty:4, cats:[29,30,31,32,34,39,40,41,44],                 startSlots:2 },
+  { name:'World & Culture', emoji:'🌐', desc:'Global & arts mix — stay sharp',               difficulty:5, cats:[33,35,36,37,38,42,43,30,32,34],              startSlots:2 },
+  { name:'Nightmare Mode',  emoji:'💀', desc:'11 categories. One starting slot. No mercy.', difficulty:6, cats:[29,31,33,35,36,37,38,39,40,41,42],           startSlots:1 },
 ];
 
 // ── Dynamic level state ───────────────────────────────────────────────────────
@@ -593,7 +645,7 @@ function buildLevelScreen() {
   LEVELS.forEach((L, i) => {
     const card = document.createElement('div');
     card.className = 'lv-card';
-    const stars   = '⭐'.repeat(L.difficulty) + '☆'.repeat(3 - L.difficulty);
+    const stars   = '⭐'.repeat(Math.min(L.difficulty, 5)) + '☆'.repeat(Math.max(0, 5 - L.difficulty));
     const catIcons = L.cats.map(c => ALL_CATS[c].icon).join(' ');
     card.innerHTML =
       `<div class="lv-badge">Level ${i + 1}</div>` +
