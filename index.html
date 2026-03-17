@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Word Solitaire</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #2d5a3d;
+  --cw: 74px;
+  --ch: 108px;
+  --cr: 9px;
+  --gap: 5px;
+  --off-up: 22px;
+  --off-dn: 9px;
+}
+body {
+  background: var(--bg);
+  min-height: 100dvh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  overflow-x: hidden;
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+#hdr {
+  background: rgba(0,0,0,0.4);
+  color: white;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#hdr-title { font-size: 1.05rem; font-weight: 700; letter-spacing: 0.01em; }
+.sp { flex: 1; }
+#hdr-score { font-size: 0.82rem; opacity: 0.85; white-space: nowrap; }
+.btn {
+  background: rgba(255,255,255,0.16);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.28);
+  border-radius: 7px;
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.btn:active { background: rgba(255,255,255,0.32); }
+
+/* ── Game layout ─────────────────────────────────────────────────── */
+#game {
+  padding: var(--gap);
+  max-width: 680px;
+  margin: 0 auto;
+}
+#top-row {
+  display: flex;
+  gap: var(--gap);
+  margin-bottom: var(--gap);
+  align-items: flex-start;
+}
+#left-piles { display: flex; flex-direction: column; gap: var(--gap); }
+#right-col { display: flex; flex-direction: column; gap: 4px; margin-left: auto; }
+#foundations { display: grid; gap: var(--gap); }
+#completed-strip { display: flex; flex-wrap: wrap; gap: 3px; justify-content: flex-end; min-height: 0; }
+.done-badge {
+  background: rgba(255,255,255,0.18); border-radius: 6px;
+  padding: 2px 5px; font-size: 1rem; line-height: 1;
+  title: attr(title);
+}
+#tableau { display: flex; gap: var(--gap); align-items: flex-start; }
+
+/* ── Pile wrappers ───────────────────────────────────────────────── */
+.pile-wrap {
+  width: var(--cw);
+  height: var(--ch);
+  position: relative;
+  flex-shrink: 0;
+}
+.empty-slot {
+  position: absolute; inset: 0;
+  border-radius: var(--cr);
+  border: 2px dashed rgba(255,255,255,0.28);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px;
+  font-size: 1.3rem;
+  transition: border-color 0.15s;
+}
+.empty-slot .slot-label {
+  font-size: 0.48rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.5);
+}
+.slot-locked {
+  border-color: rgba(255,255,255,0.13) !important;
+  opacity: 0.5;
+}
+
+/* ── Cards ───────────────────────────────────────────────────────── */
+.card {
+  width: var(--cw);
+  height: var(--ch);
+  border-radius: var(--cr);
+  position: absolute;
+  top: 0; left: 0;
+  cursor: grab;
+  user-select: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  overflow: hidden;
+  touch-action: none;
+}
+.card:active { cursor: grabbing; }
+
+/* Card back */
+.card-back {
+  background:
+    repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.04) 5px, rgba(255,255,255,0.04) 10px),
+    linear-gradient(135deg, #1a2e6e 0%, #253d96 50%, #1a2e6e 100%);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  cursor: default;
+  touch-action: manipulation;
+}
+.card-back::after {
+  content: '🂠';
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; opacity: 0.18;
+  pointer-events: none;
+}
+
+/* Card front */
+.card-front {
+  background: white;
+  border: 2px solid var(--cat-color, #999);
+  display: flex;
+  flex-direction: column;
+}
+.cf-header {
+  background: var(--cat-color, #999);
+  color: white;
+  padding: 2px 5px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  min-height: 18px;
+}
+.cf-icon { font-size: 0.72rem; line-height: 1; }
+.cf-cat  { font-size: 0.44rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; overflow: hidden; white-space: nowrap; }
+.cf-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 2px 4px;
+  gap: 2px;
+}
+.cf-emoji {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+.cf-word {
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-align: center;
+  color: var(--cat-color, #333);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* ✨ Gold Card */
+.card-gold {
+  border: 2.5px solid #f5c518 !important;
+  box-shadow: 0 0 10px rgba(245,197,24,0.5), 0 2px 8px rgba(0,0,0,0.35) !important;
+}
+.card-gold .cf-header {
+  background: linear-gradient(135deg, #9a6200 0%, #f5c518 45%, #9a6200 100%) !important;
+  color: #2a1800 !important;
+}
+.card-gold .cf-cat { color: #2a1800 !important; opacity: 1; }
+.card-gold .cf-word { color: #9a6200 !important; }
+
+/* Drag ghost */
+#drag-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.88;
+}
+
+/* Source cards fade while dragging */
+.drag-source {
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+/* Valid drop target highlight */
+.drop-ok {
+  outline: 3px solid #4caf50 !important;
+  outline-offset: -2px;
+  border-radius: var(--cr);
+}
+
+/* Tableau column */
+.col {
+  width: var(--cw);
+  flex-shrink: 0;
+  position: relative;
+  min-height: var(--ch);
+}
+.col-slot {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: var(--ch);
+  border-radius: var(--cr);
+  border: 2px dashed rgba(255,255,255,0.18);
+}
+
+/* ── Level Select Screen ─────────────────────────────────────────── */
+#level-screen {
+  display: none; position: fixed; inset: 0; z-index: 400;
+  background: linear-gradient(160deg, #1a3a2a 0%, #2d5a3d 60%, #1a3a2a 100%);
+  flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px 16px; gap: 20px; overflow-y: auto;
+}
+#level-screen.show { display: flex; }
+#ls-header { text-align: center; }
+#ls-title { color: white; font-size: 1.5rem; font-weight: 800; }
+#ls-sub { color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 4px; }
+#ls-cards { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: 700px; width: 100%; }
+.lv-card {
+  background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 16px; padding: 16px 14px; cursor: pointer; width: 190px;
+  transition: background 0.15s, transform 0.1s, border-color 0.15s;
+  text-align: center; color: white;
+}
+.lv-card:hover { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.45); transform: translateY(-3px); }
+.lv-card:active { transform: scale(0.97); }
+.lv-badge {
+  display: inline-block; background: rgba(0,0,0,0.3); border-radius: 20px;
+  padding: 2px 10px; font-size: 0.65rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;
+}
+.lv-emoji { font-size: 2.4rem; line-height: 1; margin-bottom: 6px; }
+.lv-name  { font-size: 0.9rem; font-weight: 800; margin-bottom: 4px; }
+.lv-desc  { font-size: 0.7rem; opacity: 0.7; margin-bottom: 8px; line-height: 1.4; }
+.lv-stars { font-size: 0.85rem; margin-bottom: 6px; letter-spacing: 2px; }
+.lv-cats  { font-size: 1.05rem; letter-spacing: 3px; margin-bottom: 12px; }
+.lv-play  {
+  background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.35);
+  color: white; border-radius: 8px; padding: 6px 0; font-size: 0.78rem;
+  font-weight: 700; cursor: pointer; width: 100%; transition: background 0.12s;
+}
+.lv-play:hover { background: rgba(255,255,255,0.3); }
+
+/* ── Win screen ──────────────────────────────────────────────────── */
+#win {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.85);
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; color: white; text-align: center; padding: 20px;
+}
+#win.show { display: flex; }
+#win .win-emoji { font-size: 3.5rem; }
+#win h2 { font-size: 2.2rem; font-weight: 800; }
+#win p { opacity: 0.75; font-size: 0.95rem; }
+.win-btn {
+  background: #f5c518; color: #111;
+  border: none; padding: 12px 30px;
+  border-radius: 10px; font-size: 1rem;
+  font-weight: 700; cursor: pointer; margin-top: 4px;
+}
+.win-btn-alt {
+  background: rgba(255,255,255,0.15); color: white;
+  border: 1.5px solid rgba(255,255,255,0.35); padding: 10px 24px;
+  border-radius: 10px; font-size: 0.88rem; font-weight: 600;
+  cursor: pointer; margin-top: 2px;
+}
+.win-btn-alt:active { background: rgba(255,255,255,0.28); }
+
+/* ── Help modal ──────────────────────────────────────────────────── */
+#help-modal {
+  display: none; position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,0.82);
+  align-items: center; justify-content: center; padding: 14px;
+}
+#help-modal.show { display: flex; }
+#help-box {
+  background: #f7f7f7; border-radius: 14px;
+  padding: 18px; max-width: 400px; width: 100%;
+  max-height: 92vh; overflow-y: auto;
+}
+#help-box h3 { font-size: 1.1rem; margin-bottom: 10px; }
+.cat-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 6px; margin: 10px 0;
+}
+.cat-chip {
+  border-radius: 8px; padding: 6px 8px;
+  font-size: 0.72rem; font-weight: 700;
+  color: white; line-height: 1.4;
+}
+.cat-chip .ch-name { font-size: 0.65rem; opacity: 0.88; text-transform: uppercase; letter-spacing: 0.05em; }
+.cat-chip .ch-words { font-size: 0.6rem; font-weight: 400; opacity: 0.85; margin-top: 2px; }
+.help-rule-box {
+  background: white; border-radius: 8px;
+  padding: 10px; margin-bottom: 8px; font-size: 0.82rem; line-height: 1.55;
+}
+.close-btn {
+  background: #222; color: white; border: none;
+  padding: 9px 22px; border-radius: 7px;
+  cursor: pointer; font-size: 0.88rem; margin-top: 6px; width: 100%;
+}
+
+/* ── Toast ───────────────────────────────────────────────────────── */
+#toast {
+  position: fixed; bottom: 26px; left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(15,15,15,0.9); color: white;
+  padding: 8px 18px; border-radius: 20px; font-size: 0.8rem;
+  opacity: 0; transition: all 0.22s; z-index: 500; pointer-events: none;
+  white-space: nowrap; max-width: 90vw;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media (max-width: 580px) {
+  :root { --cw: 42px; --ch: 62px; --cr: 6px; --gap: 3px; --off-up: 14px; --off-dn: 6px; }
+  #hdr-title { font-size: 0.9rem; }
+  .cf-icon  { font-size: 0.58rem; }
+  .cf-cat   { font-size: 0.34rem; }
+  .cf-emoji { font-size: 1.05rem; }
+  .cf-word  { font-size: 0.42rem; }
+  .empty-slot { font-size: 0.9rem; }
+  .empty-slot .slot-label { font-size: 0.36rem; }
+}
+@media (max-width: 380px) {
+  :root { --cw: 37px; --ch: 55px; --gap: 2px; --off-up: 12px; --off-dn: 5px; }
+  .cf-emoji { font-size: 0.9rem; }
+  .cf-word  { font-size: 0.38rem; }
+}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <span id="hdr-title">🃏 Word Solitaire</span>
+  <button class="btn" id="hdr-level" onclick="showLevelScreen()" style="font-size:0.7rem;padding:4px 8px;">🌟 Lv.1</button>
+  <div class="sp"></div>
+  <span id="hdr-score">Score: 0</span>
+  <button class="btn" onclick="undoMove()">↩ Undo</button>
+  <button class="btn" onclick="newGame()">↺ New</button>
+  <button class="btn" onclick="document.getElementById('help-modal').classList.add('show')">?</button>
+</div>
+
+<div id="game">
+  <div id="top-row">
+    <div id="left-piles">
+      <div class="pile-wrap" id="stock-wrap"></div>
+      <div class="pile-wrap" id="waste-wrap"></div>
+    </div>
+    <div class="sp"></div>
+    <div id="right-col">
+      <div id="foundations"></div>
+      <div id="completed-strip"></div>
+    </div>
+  </div>
+  <div id="tableau"></div>
+</div>
+
+<div id="level-screen">
+  <div id="ls-header">
+    <div id="ls-title">🃏 Word Solitaire</div>
+    <div id="ls-sub">Choose Your Level</div>
+  </div>
+  <div id="ls-cards"></div>
+</div>
+
+<div id="win">
+  <div class="win-emoji">🎉</div>
+  <h2 id="win-title">You Win!</h2>
+  <p id="win-score">Score: 0</p>
+  <button class="win-btn" id="btn-next-level" onclick="nextLevel()">Next Level →</button>
+  <button class="win-btn win-btn-alt" onclick="replayLevel()">Play Again</button>
+  <button class="win-btn win-btn-alt" onclick="showLevelScreen()">Level Select</button>
+</div>
+
+<div id="help-modal">
+  <div id="help-box">
+    <h3>🃏 How to Play</h3>
+    <div class="help-rule-box">
+      <strong>Goal:</strong> Sort all cards into foundation piles — one per category.
+    </div>
+    <div class="help-rule-box">
+      <strong>✨ Gold Cards:</strong> The first card of each category has a gold border. Drag it to any empty foundation slot to unlock that slot for its category.
+    </div>
+    <div class="help-rule-box">
+      <strong>Foundations:</strong> Once unlocked, drag any card of that category there — <em>in any order</em>.
+    </div>
+    <div class="help-rule-box">
+      <strong>Tableau stacking:</strong> Stack cards of the <strong>same category</strong> only. Any card can start an empty column.
+    </div>
+    <div class="help-rule-box">
+      <strong>Controls:</strong> <em>Drag</em> to move cards. <em>Tap</em> a face-down card to flip it. <em>Double-tap</em> a face-up card to auto-send it to its foundation.
+    </div>
+    <p style="font-size:0.8rem;font-weight:700;margin:10px 0 6px;">Categories (✨ = Gold Card):</p>
+    <div class="cat-grid" id="help-cats"></div>
+    <button class="close-btn" onclick="document.getElementById('help-modal').classList.remove('show')">Got it!</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+// ── Data ──────────────────────────────────────────────────────────────────────
+
+const ALL_CATS = [
+  // Level 1 — The Classics (indices 0–5)
+  { name:'Animals',    icon:'🦁', color:'#c0392b' },
+  { name:'Foods',      icon:'🍽️', color:'#e67e22' },
+  { name:'Sports',     icon:'🏅', color:'#d35400' },
+  { name:'Weather',    icon:'⛅', color:'#2980b9' },
+  { name:'Plants',     icon:'🌿', color:'#27ae60' },
+  { name:'Countries',  icon:'🌍', color:'#8e44ad' },
+  // Level 2 — Arts & Beyond (indices 6–12)
+  { name:'Music',      icon:'🎵', color:'#16a085' },
+  { name:'Buildings',  icon:'🏛️', color:'#7f6000' },
+  { name:'Dances',     icon:'💃', color:'#e91e8c' },
+  { name:'Space',      icon:'🚀', color:'#1565c0' },
+  { name:'Mythical',   icon:'🐉', color:'#6a1b9a' },
+  { name:'Cocktails',  icon:'🍸', color:'#00897b' },
+  { name:'Dinosaurs',  icon:'🦕', color:'#558b2f' },
+  // Level 3 — Weird & Wild (indices 13–20)
+  { name:'Villains',   icon:'🦹', color:'#37474f' },
+  { name:'Slang',      icon:'📲', color:'#f57c00' },
+  { name:'Phobias',    icon:'😱', color:'#c62828' },
+  { name:'Emotions',   icon:'😤', color:'#ad1457' },
+  { name:'Cheeses',    icon:'🧀', color:'#f9a825' },
+  { name:'Spells',     icon:'🪄', color:'#4527a0' },
+  { name:'Hot Sauce',  icon:'🌶️', color:'#b71c1c' },
+  { name:'Conspiracy', icon:'👁️', color:'#1b5e20' },
+];
+
+const ALL_WORDS = [
+  // 0 Animals (7)
+  [['Ant','🐜'],['Bear','🐻'],['Cat','🐱'],['Deer','🦌'],['Eagle','🦅'],['Fox','🦊'],['Goat','🐐']],
+  // 1 Foods (6)
+  [['Apple','🍎'],['Bread','🍞'],['Cake','🎂'],['Egg','🥚'],['Grape','🍇'],['Lemon','🍋']],
+  // 2 Sports (6)
+  [['Boxing','🥊'],['Cricket','🏏'],['Cycling','🚴'],['Fencing','🤺'],['Golf','⛳'],['Hockey','🏒']],
+  // 3 Weather (6)
+  [['Cloud','☁️'],['Drizzle','🌧️'],['Eclipse','🌑'],['Fog','🌫️'],['Rainbow','🌈'],['Storm','⛈️']],
+  // 4 Plants (5)
+  [['Bamboo','🎋'],['Cactus','🌵'],['Daisy','🌼'],['Fern','🌿'],['Rose','🌹']],
+  // 5 Countries (7)
+  [['Brazil','🇧🇷'],['China','🇨🇳'],['Egypt','🇪🇬'],['France','🇫🇷'],['Germany','🇩🇪'],['India','🇮🇳'],['Japan','🇯🇵']],
+  // 6 Music (6)
+  [['Cello','🎻'],['Drum','🥁'],['Guitar','🎸'],['Horn','📯'],['Piano','🎹'],['Saxophone','🎷']],
+  // 7 Buildings (5)
+  [['Bridge','🌉'],['Castle','🏰'],['Dome','🕌'],['Fortress','🏯'],['Tower','🗼']],
+  // 8 Dances (6)
+  [['Tango','💃'],['Waltz','🎩'],['Salsa','🪇'],['Breakdance','🤸'],['Disco','🪩'],['Floss','🦷']],
+  // 9 Space (6)
+  [['Nebula','🌌'],['Comet','☄️'],['Quasar','🌠'],['Asteroid','🪨'],['Blackhole','🕳️'],['Supernova','💥']],
+  // 10 Mythical (6)
+  [['Dragon','🐉'],['Unicorn','🦄'],['Mermaid','🧜'],['Kraken','🦑'],['Phoenix','🔥'],['Yeti','🧊']],
+  // 11 Cocktails (6)
+  [['Mojito','🌿'],['Martini','🍸'],['Negroni','🥃'],['Daiquiri','🍹'],['Bellini','🍾'],['Gimlet','🍋']],
+  // 12 Dinosaurs (6)
+  [['T-Rex','🦖'],['Raptor','🦕'],['Triceratops','🪖'],['Pterodactyl','🪂'],['Ankylosaur','🛡️'],['Brachiosaurus','🌳']],
+  // 13 Villains (6)
+  [['Joker','🃏'],['Thanos','💜'],['Voldemort','💀'],['Vader','⚫'],['Moriarty','🔍'],['Ursula','🐙']],
+  // 14 Slang (6)
+  [['Slay','👑'],['FOMO','😰'],['Rizz','💝'],['Ratio','📊'],['Cringe','😬'],['Ghosting','👻']],
+  // 15 Phobias (6)
+  [['Heights','😵'],['Spiders','🕷️'],['Clowns','🤡'],['Flying','✈️'],['Needles','💉'],['Crowds','👥']],
+  // 16 Emotions (6)
+  [['Rage','😡'],['Envy','💚'],['Awe','🤩'],['Bliss','😇'],['Dread','😨'],['Guilt','😞']],
+  // 17 Cheeses (5)
+  [['Brie','🧀'],['Gouda','🟡'],['Feta','🫙'],['Gruyère','🧈'],['Manchego','🐑']],
+  // 18 Spells (6)
+  [['Hex','🔮'],['Jinx','🪬'],['Ritual','🕯️'],['Banish','🌪️'],['Charm','🧿'],['Curse','☠️']],
+  // 19 Hot Sauce (5)
+  [['Tabasco','🌡️'],['Sriracha','🐓'],['Cholula','🎃'],['Chipotle','🍂'],['Habanero','💥']],
+  // 20 Conspiracy (5)
+  [['Bigfoot','🦶'],['Flat Earth','🌐'],['Lizard Folk','🦎'],['Microchip','💾'],['Illuminati','👁️']],
+];
+
+const LEVELS = [
+  { name:'The Classics',  emoji:'🌟', desc:'Familiar words, friendly game',         difficulty:1, cats:[0,1,2,3,4,5],           startSlots:3 },
+  { name:'Arts & Beyond', emoji:'🎭', desc:'Creative categories, trickier deck',     difficulty:2, cats:[6,7,8,9,10,11,12],       startSlots:3 },
+  { name:'Weird & Wild',  emoji:'🤪', desc:'Unexpected themes, maximum chaos',       difficulty:3, cats:[13,14,15,16,17,18,19,20], startSlots:3 },
+];
+
+// ── Dynamic level state ───────────────────────────────────────────────────────
+
+let currentLevel = 0;
+let CATS = [], WORDS = [], NUM_CATS = 0;
+
+function applyLevel(lvl) {
+  const L = LEVELS[lvl];
+  CATS  = L.cats.map(i => ALL_CATS[i]);
+  WORDS = L.cats.map(i => ALL_WORDS[i]);
+  NUM_CATS = CATS.length;
+}
+
+function catLen(cat)  { return WORDS[cat].length; }
+function totalCards() { return WORDS.reduce((s, w) => s + w.length, 0); }
+
+// ── Level screen ──────────────────────────────────────────────────────────────
+
+function showLevelScreen() {
+  document.getElementById('win').classList.remove('show');
+  document.getElementById('level-screen').classList.add('show');
+}
+
+function startLevel(n) {
+  currentLevel = n;
+  applyLevel(n);
+  document.getElementById('level-screen').classList.remove('show');
+  buildHelpCats();
+  updateLevelBadge();
+  newGame();
+}
+
+function nextLevel() {
+  if (currentLevel < LEVELS.length - 1) startLevel(currentLevel + 1);
+}
+
+function replayLevel() {
+  document.getElementById('win').classList.remove('show');
+  newGame();
+}
+
+function updateLevelBadge() {
+  const L = LEVELS[currentLevel];
+  document.getElementById('hdr-level').textContent = `${L.emoji} Lv.${currentLevel + 1}`;
+}
+
+function buildLevelScreen() {
+  const container = document.getElementById('ls-cards');
+  container.innerHTML = '';
+  LEVELS.forEach((L, i) => {
+    const card = document.createElement('div');
+    card.className = 'lv-card';
+    const stars   = '⭐'.repeat(L.difficulty) + '☆'.repeat(3 - L.difficulty);
+    const catIcons = L.cats.map(c => ALL_CATS[c].icon).join(' ');
+    card.innerHTML =
+      `<div class="lv-badge">Level ${i + 1}</div>` +
+      `<div class="lv-emoji">${L.emoji}</div>` +
+      `<div class="lv-name">${L.name}</div>` +
+      `<div class="lv-desc">${L.desc}</div>` +
+      `<div class="lv-stars">${stars}</div>` +
+      `<div class="lv-cats">${catIcons}</div>` +
+      `<button class="lv-play">Play →</button>`;
+    card.addEventListener('click', () => startLevel(i));
+    container.appendChild(card);
+  });
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+
+let G    = {};
+let drag = null;
+let score = 0;
+let hist  = [];
+let lastTap = { t: 0, pile: '', col: -1, idx: -1 };
+
+// ── Deck & init ───────────────────────────────────────────────────────────────
+
+function createDeck() {
+  const d = [];
+  for (let cat = 0; cat < NUM_CATS; cat++)
+    for (let rank = 1; rank <= catLen(cat); rank++)
+      d.push({ cat, rank, faceUp: false });
+  return d;
+}
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function cloneG() {
+  return {
+    stock:              G.stock.map(c => ({...c})),
+    waste:              G.waste.map(c => ({...c})),
+    foundations:        G.foundations.map(f => f.map(c => ({...c}))),
+    foundationCat:      [...G.foundationCat],
+    foundationRevealed: G.foundationRevealed,
+    tableau:            G.tableau.map(col => col.map(c => ({...c}))),
+  };
+}
+
+function newGame() {
+  applyLevel(currentLevel);
+  score = 0; drag = null; hist = [];
+  const deck = shuffle(createDeck());
+  G = {
+    stock: [], waste: [],
+    foundations:        Array.from({length: NUM_CATS}, () => []),
+    foundationCat:      Array(NUM_CATS).fill(-1),
+    foundationRevealed: LEVELS[currentLevel].startSlots,
+    tableau:            Array.from({length: 5}, () => []),
+  };
+  const extraHidden = 2;
+  let i = 0;
+  for (let col = 0; col < 5; col++)
+    for (let row = 0; row <= col + extraHidden; row++) {
+      deck[i].faceUp = (row === col + extraHidden);
+      G.tableau[col].push(deck[i++]);
+    }
+  while (i < deck.length) G.stock.push(deck[i++]);
+  document.getElementById('win').classList.remove('show');
+  const ghost = document.getElementById('drag-ghost');
+  if (ghost) ghost.remove();
+  document.body.style.touchAction = '';
+  render();
+}
+
+// ── Card element ──────────────────────────────────────────────────────────────
+
+function makeCard(card, sourcePile, sourceCol, sourceIdx) {
+  const el = document.createElement('div');
+  el.className = 'card';
+
+  if (!card.faceUp) {
+    el.classList.add('card-back');
+    if (sourcePile !== undefined)
+      el.addEventListener('pointerdown', e => initDrag(e, card, sourcePile, sourceCol, sourceIdx));
+    return el;
+  }
+
+  const cat    = CATS[card.cat];
+  const [word, emoji] = WORDS[card.cat][card.rank - 1];
+  const isGold = card.rank === 1;
+
+  el.classList.add('card-front');
+  if (isGold) el.classList.add('card-gold');
+  el.style.setProperty('--cat-color', cat.color);
+  el.innerHTML =
+    `<div class="cf-header">` +
+      `<span class="cf-icon">${isGold ? '✨' : cat.icon}</span>` +
+      `<span class="cf-cat">${cat.name}</span>` +
+    `</div>` +
+    `<div class="cf-body">` +
+      `<span class="cf-emoji">${emoji}</span>` +
+      `<span class="cf-word">${word}</span>` +
+    `</div>`;
+
+  if (sourcePile !== undefined)
+    el.addEventListener('pointerdown', e => initDrag(e, card, sourcePile, sourceCol, sourceIdx));
+  return el;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+
+function cssVar(v) {
+  return parseInt(getComputedStyle(document.documentElement).getPropertyValue(v)) || 0;
+}
+
+function render() {
+  document.getElementById('hdr-score').textContent = `Score: ${score}`;
+  renderStock();
+  renderWaste();
+  renderFoundations();
+  renderTableau();
+}
+
+function renderStock() {
+  const w = document.getElementById('stock-wrap');
+  w.innerHTML = '';
+  if (G.stock.length === 0) {
+    const s = mkSlot('♻️', 'Recycle');
+    s.style.cursor = 'pointer';
+    s.addEventListener('pointerdown', e => { e.preventDefault(); clickStock(); });
+    w.appendChild(s);
+  } else {
+    const c = makeCard({ faceUp: false });
+    c.style.cursor = 'pointer';
+    c.addEventListener('pointerdown', e => { e.preventDefault(); clickStock(); });
+    w.appendChild(c);
+    if (G.stock.length > 1) {
+      const n = document.createElement('span');
+      n.style.cssText = 'position:absolute;bottom:3px;right:5px;color:white;font-size:0.58rem;font-weight:800;text-shadow:0 1px 3px #000;z-index:5;pointer-events:none';
+      n.textContent = G.stock.length;
+      w.appendChild(n);
+    }
+  }
+}
+
+function renderWaste() {
+  const w = document.getElementById('waste-wrap');
+  w.innerHTML = '';
+  if (G.waste.length === 0) { w.appendChild(mkSlot()); return; }
+  const show = Math.min(3, G.waste.length);
+  for (let i = G.waste.length - show; i < G.waste.length; i++) {
+    const isTop = (i === G.waste.length - 1);
+    const off   = i - (G.waste.length - show);
+    const c = makeCard(G.waste[i], isTop ? 'waste' : undefined, -1, i);
+    c.style.left   = (off * 2) + 'px';
+    c.style.zIndex = i + 1;
+    if (drag && drag.dragging && drag.sourcePile === 'waste' && isTop)
+      c.classList.add('drag-source');
+    if (!isTop) c.style.pointerEvents = 'none';
+    w.appendChild(c);
+  }
+}
+
+function renderFoundations() {
+  const el = document.getElementById('foundations');
+  el.style.gridTemplateColumns = `repeat(3, var(--cw))`;
+  el.innerHTML = '';
+  const done = [];
+  for (let f = 0; f < G.foundationRevealed; f++) {
+    const catIdx = G.foundationCat[f];
+    // Complete foundations disappear from the grid
+    if (catIdx !== -1 && G.foundations[f].length === catLen(catIdx)) {
+      done.push(CATS[catIdx]);
+      continue;
+    }
+    const w = document.createElement('div');
+    w.className = 'pile-wrap';
+    w.dataset.foundation = f;
+
+    if (catIdx === -1) {
+      const s = mkSlot('🔒', '—');
+      s.classList.add('slot-locked');
+      w.appendChild(s);
+    } else if (G.foundations[f].length === 0) {
+      const cat = CATS[catIdx];
+      const s = mkSlot(cat.icon, cat.name);
+      s.style.borderColor = cat.color + '88';
+      w.appendChild(s);
+    } else {
+      const top = G.foundations[f][G.foundations[f].length - 1];
+      const c   = makeCard(top);
+      w.appendChild(c);
+      const pct = (G.foundations[f].length / catLen(catIdx)) * 100;
+      const cr  = cssVar('--cr');
+      const prog = document.createElement('div');
+      prog.style.cssText = `position:absolute;bottom:0;left:0;height:3px;width:${pct}%;background:${CATS[catIdx].color};border-radius:0 0 ${cr}px ${cr}px;pointer-events:none;z-index:5`;
+      w.appendChild(prog);
+      const lbl = document.createElement('div');
+      lbl.style.cssText = `position:absolute;top:2px;right:4px;font-size:0.42rem;font-weight:700;color:white;text-shadow:0 1px 2px rgba(0,0,0,0.7);z-index:5;pointer-events:none`;
+      lbl.textContent = `${G.foundations[f].length}/${catLen(catIdx)}`;
+      w.appendChild(lbl);
+    }
+    el.appendChild(w);
+  }
+  // Show completed categories as small badges below the grid
+  const strip = document.getElementById('completed-strip');
+  strip.innerHTML = done.length
+    ? done.map(c => `<span class="done-badge" title="${c.name}">${c.icon}</span>`).join('')
+    : '';
+}
+
+function renderTableau() {
+  const el = document.getElementById('tableau');
+  el.innerHTML = '';
+  const ch = cssVar('--ch'), offUp = cssVar('--off-up'), offDn = cssVar('--off-dn');
+
+  for (let col = 0; col < 5; col++) {
+    const colEl = document.createElement('div');
+    colEl.className = 'col';
+    colEl.dataset.col = col;
+    const cards = G.tableau[col];
+
+    if (cards.length === 0) {
+      colEl.style.height = ch + 'px';
+      const slot = document.createElement('div');
+      slot.className = 'col-slot';
+      slot.dataset.col = col;
+      colEl.appendChild(slot);
+      el.appendChild(colEl);
+      continue;
+    }
+
+    const yPos = [0];
+    for (let i = 0; i < cards.length - 1; i++)
+      yPos.push(yPos[i] + (cards[i + 1].faceUp ? offUp : offDn));
+
+    colEl.style.height = (yPos[yPos.length - 1] + ch) + 'px';
+
+    for (let i = 0; i < cards.length; i++) {
+      const isDragSrc = drag && drag.dragging &&
+                        drag.sourcePile === 'tableau' &&
+                        drag.sourceCol === col && i >= drag.sourceIdx;
+      const cel = makeCard(cards[i], 'tableau', col, i);
+      cel.style.top    = yPos[i] + 'px';
+      cel.style.zIndex = i + 1;
+      if (isDragSrc) cel.classList.add('drag-source');
+      colEl.appendChild(cel);
+    }
+    el.appendChild(colEl);
+  }
+}
+
+function mkSlot(icon, label) {
+  const s = document.createElement('div');
+  s.className = 'empty-slot';
+  if (icon)  s.innerHTML  = `<span>${icon}</span>`;
+  if (label) s.innerHTML += `<span class="slot-label">${label}</span>`;
+  return s;
+}
+
+// ── Drag & Drop (Pointer Events) ──────────────────────────────────────────────
+
+function initDrag(e, card, sourcePile, sourceCol, sourceIdx) {
+  if (drag) return;
+
+  // Face-down: flip on tap
+  if (!card.faceUp) {
+    if (sourcePile === 'tableau' && sourceIdx === G.tableau[sourceCol].length - 1) {
+      e.preventDefault();
+      saveHist();
+      G.tableau[sourceCol][sourceIdx].faceUp = true;
+      score += 5;
+      render();
+    }
+    return;
+  }
+
+  e.preventDefault();
+
+  const cards = sourcePile === 'waste'
+    ? [card]
+    : G.tableau[sourceCol].slice(sourceIdx);
+
+  const rect = e.currentTarget.getBoundingClientRect();
+  drag = {
+    sourcePile, sourceCol, sourceIdx,
+    cards,
+    startX: e.clientX, startY: e.clientY,
+    offsetX: e.clientX - rect.left,
+    offsetY: e.clientY - rect.top,
+    dragging: false,
+    ghostEl: null,
+    tapTime: Date.now(),
+  };
+}
+
+document.addEventListener('pointermove', function(e) {
+  if (!drag) return;
+  e.preventDefault();
+  const dx = e.clientX - drag.startX, dy = e.clientY - drag.startY;
+  if (!drag.dragging && (dx * dx + dy * dy) > 64) {
+    drag.dragging = true;
+    document.body.style.touchAction = 'none';
+    createGhost(e.clientX, e.clientY);
+    render();
+  }
+  if (drag.dragging && drag.ghostEl) {
+    drag.ghostEl.style.left = (e.clientX - drag.offsetX) + 'px';
+    drag.ghostEl.style.top  = (e.clientY - drag.offsetY) + 'px';
+    highlightDropTargets();
+  }
+}, { passive: false });
+
+document.addEventListener('pointerup', function(e) {
+  if (!drag) return;
+  if (drag.dragging) {
+    clearDropHighlights();
+    executeDrop(e.clientX, e.clientY);
+    cleanupDrag(true);
+  } else {
+    handleTap();
+    drag = null;
+  }
+});
+
+document.addEventListener('pointercancel', function() {
+  if (drag) cleanupDrag(true);
+});
+
+function createGhost(x, y) {
+  const cw = cssVar('--cw'), ch = cssVar('--ch'), offUp = cssVar('--off-up');
+  const ghost = document.createElement('div');
+  ghost.id = 'drag-ghost';
+  ghost.style.width  = cw + 'px';
+  ghost.style.height = (ch + Math.max(0, drag.cards.length - 1) * offUp) + 'px';
+  ghost.style.left   = (x - drag.offsetX) + 'px';
+  ghost.style.top    = (y - drag.offsetY) + 'px';
+  drag.cards.forEach((card, i) => {
+    const el = makeCard({...card, faceUp: true});
+    el.style.top    = (i * offUp) + 'px';
+    el.style.zIndex = i + 1;
+    ghost.appendChild(el);
+  });
+  document.body.appendChild(ghost);
+  drag.ghostEl = ghost;
+}
+
+function highlightDropTargets() {
+  clearDropHighlights();
+  const topCard = drag.cards[0];
+  document.querySelectorAll('[data-foundation]').forEach(w => {
+    const f = parseInt(w.dataset.foundation);
+    if (!canFoundation(topCard, f)) return;
+    const catIdxF = G.foundationCat[f] === -1 ? topCard.cat : G.foundationCat[f];
+    if (drag.cards.some(c => c.cat !== catIdxF)) return;
+    const space = catLen(catIdxF) - G.foundations[f].length;
+    if (drag.cards.length <= space) w.classList.add('drop-ok');
+  });
+  document.querySelectorAll('[data-col]').forEach(el => {
+    const col = parseInt(el.dataset.col);
+    if (drag.sourcePile === 'tableau' && drag.sourceCol === col) return;
+    const tCol = G.tableau[col];
+    if (tCol.length === 0 || canTableau(topCard, tCol[tCol.length - 1]))
+      el.classList.add('drop-ok');
+  });
+}
+
+function clearDropHighlights() {
+  document.querySelectorAll('.drop-ok').forEach(el => el.classList.remove('drop-ok'));
+}
+
+function cleanupDrag(doRender) {
+  const ghost = document.getElementById('drag-ghost');
+  if (ghost) ghost.remove();
+  drag = null;
+  document.body.style.touchAction = '';
+  if (doRender) render();
+}
+
+function executeDrop(x, y) {
+  const els = document.elementsFromPoint(x, y);
+  let targetF = -1, targetCol = -1;
+  for (const el of els) {
+    if (el.id === 'drag-ghost') continue;
+    const fw = el.closest('[data-foundation]');
+    if (fw) { targetF = parseInt(fw.dataset.foundation); break; }
+    const tw = el.closest('[data-col]');
+    if (tw) { targetCol = parseInt(tw.dataset.col); break; }
+  }
+  if (targetF < 0 && targetCol < 0) return;
+
+  const topCard = drag.cards[0];
+
+  if (targetF >= 0) {
+    if (!canFoundation(topCard, targetF)) { toast(foundationMsg(topCard, targetF)); return; }
+    const catIdxF = G.foundationCat[targetF] === -1 ? topCard.cat : G.foundationCat[targetF];
+    if (drag.cards.some(c => c.cat !== catIdxF)) { toast('All cards must be same category'); return; }
+    const space = catLen(catIdxF) - G.foundations[targetF].length;
+    if (drag.cards.length > space) { toast(`Only ${space} card${space !== 1 ? 's' : ''} fit here`); return; }
+    saveHist();
+    removeDragSource();
+    const isNew = G.foundationCat[targetF] === -1;
+    if (isNew) G.foundationCat[targetF] = topCard.cat;
+    G.foundations[targetF].push(...drag.cards);
+    score += (isNew ? 20 : 0) + drag.cards.length * 10;
+    const nowDone = G.foundations[targetF].length === catLen(G.foundationCat[targetF]);
+    if (nowDone) {
+      score += 50;
+      G.foundationRevealed = Math.min(G.foundationRevealed + 1, NUM_CATS);
+      toast(`${CATS[G.foundationCat[targetF]].icon} ${CATS[G.foundationCat[targetF]].name} complete! +50`);
+    }
+    checkWin();
+  } else if (targetCol >= 0) {
+    if (drag.sourcePile === 'tableau' && drag.sourceCol === targetCol) return;
+    const tCol = G.tableau[targetCol];
+    if (tCol.length > 0 && (!tCol[tCol.length - 1].faceUp || !canTableau(topCard, tCol[tCol.length - 1]))) return;
+    saveHist();
+    removeDragSource();
+    G.tableau[targetCol].push(...drag.cards);
+  }
+}
+
+function removeDragSource() {
+  if (drag.sourcePile === 'waste') {
+    G.waste.pop();
+  } else {
+    G.tableau[drag.sourceCol].splice(drag.sourceIdx);
+    flipTop(drag.sourceCol);
+  }
+}
+
+// ── Tap handling ──────────────────────────────────────────────────────────────
+
+function handleTap() {
+  const { sourcePile, sourceCol, sourceIdx, cards } = drag;
+  const card = cards[0];
+  if (!card.faceUp) return;
+
+  const now = Date.now();
+  const dbl = (now - lastTap.t) < 400 &&
+              lastTap.pile === sourcePile &&
+              lastTap.col  === sourceCol  &&
+              lastTap.idx  === sourceIdx;
+  lastTap = { t: now, pile: sourcePile, col: sourceCol, idx: sourceIdx };
+  if (!dbl) return;
+
+  if (sourcePile === 'tableau' && sourceIdx !== G.tableau[sourceCol].length - 1) {
+    toast('Can only auto-send the top card');
+    return;
+  }
+  const f = findFoundationFor(card);
+  if (f < 0) { toast(`No open foundation for ${CATS[card.cat].name}`); return; }
+  saveHist();
+  if (sourcePile === 'waste') G.waste.pop();
+  else { G.tableau[sourceCol].pop(); flipTop(sourceCol); }
+  const isNew = G.foundationCat[f] === -1;
+  if (isNew) G.foundationCat[f] = card.cat;
+  G.foundations[f].push(card);
+  const nowDone = G.foundations[f].length === catLen(G.foundationCat[f]);
+  score += nowDone ? 50 : isNew ? 20 : 10;
+  if (nowDone) {
+    G.foundationRevealed = Math.min(G.foundationRevealed + 1, NUM_CATS);
+    toast(`${CATS[G.foundationCat[f]].icon} ${CATS[G.foundationCat[f]].name} complete! +50`);
+  }
+  render();
+  checkWin();
+}
+
+function findFoundationFor(card) {
+  for (let f = 0; f < G.foundationRevealed; f++)
+    if (canFoundation(card, f)) return f;
+  return -1;
+}
+
+// ── Stock ─────────────────────────────────────────────────────────────────────
+
+function clickStock() {
+  saveHist();
+  if (G.stock.length === 0) {
+    G.stock = [...G.waste].reverse().map(c => ({...c, faceUp: false}));
+    G.waste = [];
+    score = Math.max(0, score - 15);
+    toast('Recycled  −15 pts');
+  } else {
+    const c = G.stock.pop();
+    c.faceUp = true;
+    G.waste.push(c);
+  }
+  render();
+}
+
+// ── Game logic ────────────────────────────────────────────────────────────────
+
+function canFoundation(card, f) {
+  if (G.foundationCat[f] === -1) {
+    // Locked: only Gold Cards (rank 1) can unlock; category must not already be assigned
+    if (card.rank !== 1) return false;
+    return !G.foundationCat.includes(card.cat);
+  }
+  // Unlocked: must match category and slot must not be full
+  return card.cat === G.foundationCat[f] && G.foundations[f].length < catLen(card.cat);
+}
+
+function foundationMsg(card, f) {
+  const cat = CATS[card.cat];
+  if (G.foundationCat[f] === -1) {
+    if (card.rank !== 1) return `Only ✨ Gold Cards can open a foundation slot`;
+    return `${cat.icon} ${cat.name} already has a foundation`;
+  }
+  const a = CATS[G.foundationCat[f]];
+  if (card.cat !== G.foundationCat[f]) return `This slot is for ${a.icon} ${a.name}`;
+  return `Foundation is full`;
+}
+
+function canTableau(card, target) {
+  // Only same-category cards may stack on each other
+  return card.cat === target.cat;
+}
+
+function flipTop(col) {
+  const c = G.tableau[col];
+  if (c.length > 0 && !c[c.length - 1].faceUp) {
+    c[c.length - 1].faceUp = true;
+    score += 5;
+  }
+}
+
+function checkWin() {
+  if (G.foundations.reduce((s, f) => s + f.length, 0) === totalCards()) {
+    score += 300;
+    const lvlName = LEVELS[currentLevel].name;
+    document.getElementById('win-title').textContent = `Level ${currentLevel + 1} Complete!`;
+    document.getElementById('win-score').textContent = `Score: ${score}`;
+    document.getElementById('hdr-score').textContent = `Score: ${score}`;
+    document.getElementById('btn-next-level').style.display =
+      currentLevel < LEVELS.length - 1 ? '' : 'none';
+    document.getElementById('win').classList.add('show');
+  }
+}
+
+// ── Undo ──────────────────────────────────────────────────────────────────────
+
+function saveHist() {
+  if (hist.length > 40) hist.shift();
+  hist.push({ g: cloneG(), score });
+}
+
+function undoMove() {
+  if (!hist.length) { toast('Nothing to undo'); return; }
+  if (drag) cleanupDrag(false);
+  const h = hist.pop();
+  G = h.g; score = h.score;
+  render();
+  toast('Move undone');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+
+let toastTmr;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTmr);
+  toastTmr = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+// ── Help ──────────────────────────────────────────────────────────────────────
+
+function buildHelpCats() {
+  const el = document.getElementById('help-cats');
+  el.innerHTML = '';
+  CATS.forEach((cat, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'cat-chip';
+    chip.style.background = cat.color;
+    const words = WORDS[i].map((w, j) => (j === 0 ? '✨' : w[1]) + ' ' + w[0]);
+    chip.innerHTML =
+      `<div class="ch-name">${cat.icon} ${cat.name} ×${WORDS[i].length}</div>` +
+      `<div class="ch-words">${words.join('  ')}</div>`;
+    el.appendChild(chip);
+  });
+}
+
+// ── Start ─────────────────────────────────────────────────────────────────────
+
+window.addEventListener('resize', render);
+buildLevelScreen();
+showLevelScreen();
+</script>
+</body>
+</html>
